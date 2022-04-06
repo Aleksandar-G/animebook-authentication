@@ -47,7 +47,17 @@ client.connect((err) => {
             console.log(`waiting for requests on queue ${Generatequeue}`);
 
             channel.consume(Verifyqueue, (msg) => {
-                //console.log(msg.content.toString());
+
+                const username = msg.content.toJSON().username
+                const token = msg.content.toJSON().token
+
+                const verified = jwtController.verifyJWT(token, username, client)
+
+                channel.sendToQueue(msg.properties.replyTo, Buffer.from(verified), {
+                    correlationId: msg.properties.correlationId
+                })
+
+                channel.ack(msg)
 
             })
 

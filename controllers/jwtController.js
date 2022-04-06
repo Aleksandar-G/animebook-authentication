@@ -8,16 +8,23 @@ const issuer = process.env.ISSUER
 //verify token
 const verifyJWT = (token, username, client) => {
 
-
-
-    jwt.verify(token, secret, { algorithms: ['HS256'], issuer: issuer }, (err, token) => {
-        if (err) {
-            console.log(err.message);
+    client.db("usernames").collection("usernames").findOne({ username: username }).then((document) => {
+        if (document === null) {
+            return false
         } else {
-            return token
-        }
+            jwt.verify(token, secret, { algorithms: ['HS256'], issuer: issuer }, (err, token) => {
+                if (err) {
+                    console.log(err.message);
+                    return false
+                } else {
+                    return token
+                }
 
-    });
+            });
+        }
+    })
+
+
 
 
 }
