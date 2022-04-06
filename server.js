@@ -47,7 +47,7 @@ client.connect((err) => {
             console.log(`waiting for requests on queue ${Generatequeue}`);
 
             channel.consume(Verifyqueue, (msg) => {
-                console.log(msg.content.toString());
+                //console.log(msg.content.toString());
 
             })
 
