@@ -11,8 +11,9 @@ const databasePassword = process.env.DATABASE_PASSWORD;
 const databaseURL = process.env.DATABASE_URL;
 
 console.log(databaseUser);
-console.log(databasePassword);
+//console.log(databasePassword);
 console.log(databaseURL);
+console.log(messageBroker);
 
 //connect to database
 const uri = `mongodb+srv://${databaseUser}:${databasePassword}@${databaseURL}`;
@@ -29,7 +30,8 @@ client.connect((err) => {
     console.log("connected to db");
   }
 
-  amqp.connect(`amqp://${messageBroker}`, (err, connection) => {
+  //amqp.connect(`amqp://${messageBroker}`, (err, connection) => {
+  amqp.connect(`${messageBroker}`, (err, connection) => {
     if (err) {
       throw err;
     }
