@@ -24,8 +24,9 @@ const verifyJWT = (token, client) => {
   // })
   //console.log(token);
   return jwt.verify(token, secret, { issuer: issuer }, (err, token) => {
+    console.log("verify token");
     if (err) {
-      console.log(err.message);
+      console.error(err.message);
       return "";
     } else {
       console.log(token);
@@ -41,6 +42,7 @@ const verifyJWT = (token, client) => {
 //generate token
 //generate JWT token using SHA256
 const generateJWT = (message, client) => {
+  console.log("generateJWT");
   console.log(message);
   const messageJSON = JSON.parse(message);
   const token = jwt.sign(
