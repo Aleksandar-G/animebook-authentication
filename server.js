@@ -1,6 +1,6 @@
 const express = require("express");
 const { MongoClient, ServerApiVersion } = require("mongodb");
-const amqp = require("amqplib/callback_api");
+const amqp = require("amqplib");
 const jwtController = require("./controllers/jwtController");
 require("dotenv").config();
 
@@ -30,21 +30,15 @@ client.connect((err) => {
     console.log("connected to db");
   }
 
-  //amqp.connect(`amqp://${messageBroker}`, (err, connection) => {
-  amqp.connect(`${messageBroker}`, (err, connection) => {
-    if (err) {
-      throw err;
-    }
+  const Verifyqueue = "verify_auhtentication_queue";
+  const Generatequeue = "generate_auhtentication_queue";
 
-    connection.createChannel((err, channel) => {
-      if (err) {
-        console.error(err);
-        throw err;
-      }
-
-      const Verifyqueue = "verify_auhtentication_queue";
-      const Generatequeue = "generate_auhtentication_queue";
-
+  amqp
+    .connect(`${messageBroker}`)
+    .then((connection) => {
+      return connection.createChannel();
+    })
+    .then((channel) => {
       channel.assertQueue(Verifyqueue, {
         durable: true,
       });
@@ -52,20 +46,24 @@ client.connect((err) => {
       channel.assertQueue(Generatequeue, {
         durable: true,
       });
-
       channel.prefetch(1);
+
       console.log(`waiting for requests on queue ${Verifyqueue}`);
       console.log(`waiting for requests on queue ${Generatequeue}`);
 
       channel.consume(Verifyqueue, (msg) => {
+        console.log("hello");
         const token = msg.content.toString();
 
         const verified = jwtController.verifyJWT(token, client);
 
+        console.log("verified");
+        console.log(verified);
+        console.log(msg.properties.replyTo);
+
         channel.sendToQueue(msg.properties.replyTo, Buffer.from(verified), {
           correlationId: msg.properties.correlationId,
         });
-
         channel.ack(msg);
       });
 
@@ -80,7 +78,6 @@ client.connect((err) => {
         channel.ack(msg);
       });
     });
-  });
 
   //client.db("usernames").collection("usernames").insertOne({ "username": "testuser2" })
 });
